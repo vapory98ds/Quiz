@@ -313,6 +313,30 @@ function shareURL(code) {
   return `${location.origin}${location.pathname}#${code}`;
 }
 
+async function shortenUrl(longUrl, btnElement) {
+  const originalText = btnElement.innerHTML;
+  btnElement.innerHTML = '⏳ Acortando...';
+  btnElement.disabled = true;
+
+  try {
+    const res = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
+    const data = await res.json();
+    if (data.shorturl) {
+      navigator.clipboard.writeText(data.shorturl).then(() => {
+        showToast('¡Enlace corto copiado!', '🔗');
+        btnElement.innerHTML = '✅ Copiado: ' + data.shorturl.replace('https://','');
+      });
+    } else {
+      throw new Error(data.errormessage || 'Error al acortar');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error al acortar URL. Usa el enlace normal.', '❌');
+    btnElement.innerHTML = originalText;
+    btnElement.disabled = false;
+  }
+}
+
 // ════════════════════════════════════════════════════════════
 //  STATE
 // ════════════════════════════════════════════════════════════
@@ -527,8 +551,11 @@ function generateLink() {
     <div class="notice">🎉 ¡Quiz generado! Copia el enlace y compártelo.</div>
     <div class="link-box">
       <span class="link-url" id="generatedURL">${url}</span>
-      <button class="btn btn-success btn-sm" onclick="copyURL()">📋 Copiar</button>
-      <button class="btn btn-primary btn-sm" onclick="previewQuiz('${code}')">👁 Previsualizar</button>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" onclick="copyURL()">📋 URL Larga</button>
+        <button class="btn btn-primary btn-sm" style="background:var(--accent2);color:#000" onclick="shortenUrl(document.getElementById('generatedURL').textContent, this)">✨ Enlace Corto</button>
+        <button class="btn btn-ghost btn-sm" onclick="previewQuiz('${code}')">👁 Prever</button>
+      </div>
     </div>`;
 }
 
@@ -1068,8 +1095,11 @@ function parseAndGenerate() {
     <div class="notice">🎉 ¡Enlace generado! Cópialo y compártelo.</div>
     <div class="link-box">
       <span class="link-url" id="rdGeneratedURL">${url}</span>
-      <button class="btn btn-success btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('rdGeneratedURL').textContent).then(()=>showToast('¡Enlace copiado!','📋'))">📋 Copiar</button>
-      <button class="btn btn-primary btn-sm" onclick="renderPlayer(decodeQuiz(getHash()))">👁 Previsualizar</button>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('rdGeneratedURL').textContent).then(()=>showToast('¡Enlace copiado!','📋'))">📋 URL Larga</button>
+        <button class="btn btn-primary btn-sm" style="background:var(--accent2);color:#000" onclick="shortenUrl(document.getElementById('rdGeneratedURL').textContent, this)">✨ Enlace Corto</button>
+        <button class="btn btn-ghost btn-sm" onclick="renderPlayer(decodeQuiz(getHash()))">👁 Prever</button>
+      </div>
     </div>`;
 
   linkArea.scrollIntoView({ behavior: 'smooth' });
@@ -1106,7 +1136,7 @@ Object.assign(window, {
   updateQText, updateOptText, toggleCorrect,
   generateLink, copyURL, previewQuiz,
   selectOption, submitQuiz, restartQuiz, backToCreator,
-  switchTab, parseAndGenerate, renderPlayer, getHash, decodeQuiz
+  switchTab, parseAndGenerate, renderPlayer, getHash, decodeQuiz, shortenUrl
 });
 
 initApp();
