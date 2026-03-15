@@ -321,7 +321,7 @@ function shareURL(code) {
 
 async function shortenUrl(longUrl, btnElement) {
   const originalText = btnElement.innerHTML;
-  btnElement.innerHTML = '⏳ Acortando...';
+  btnElement.innerHTML = '⏳ Generando...';
   btnElement.disabled = true;
 
   try {
@@ -329,15 +329,19 @@ async function shortenUrl(longUrl, btnElement) {
     const data = await res.json();
     if (data.shorturl) {
       navigator.clipboard.writeText(data.shorturl).then(() => {
-        showToast('¡Enlace corto copiado!', '🔗');
-        btnElement.innerHTML = '✅ Copiado: ' + data.shorturl.replace('https://','');
+        showToast('¡Enlace copiado!', '✅');
+        btnElement.innerHTML = '✅ ¡Copiado!';
+        setTimeout(() => {
+          btnElement.innerHTML = originalText;
+          btnElement.disabled = false;
+        }, 3000);
       });
     } else {
       throw new Error(data.errormessage || 'Error al acortar');
     }
   } catch (err) {
     console.error(err);
-    showToast('Error al acortar URL. Usa el enlace normal.', '❌');
+    showToast('Error al generar enlace.', '❌');
     btnElement.innerHTML = originalText;
     btnElement.disabled = false;
   }
@@ -557,15 +561,13 @@ function generateLink() {
     <div class="notice">🎉 ¡Quiz generado exitosamente!</div>
     <div class="link-box" style="background:rgba(108,99,255,.05);border-color:rgba(108,99,255,.3)">
       <div style="width:100%">
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Tu enlace público ha sido creado. Haz clic en "Generar Enlace Corto" para compartirlo más fácil.</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Tu quiz está listo. Haz clic en "Copiar Enlace" para enviarlo a tus amigos.</div>
       </div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;width:100%">
-        <button class="btn btn-primary" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6)" onclick="shortenUrl(document.getElementById('hiddenLongUrl').textContent, this)">🔗 Generar Enlace Corto</button>
-        <button class="btn btn-ghost" onclick="copyURL()">📋 Copiar URL Larga</button>
-        <button class="btn btn-success" onclick="previewQuiz('${code}')">👁 Probar Quiz</button>
+        <button class="btn btn-primary" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6)" onclick="shortenUrl(document.getElementById('hiddenLongUrl').textContent, this)">🔗 Copiar Enlace</button>
+        <button class="btn btn-ghost" onclick="previewQuiz('${code}')">👁 Probar Quiz</button>
       </div>
       <span class="hidden" id="hiddenLongUrl">${url}</span>
-      <span class="hidden" id="generatedURL">${url}</span> <!-- fallback -->
     </div>`;
 }
 
@@ -1105,12 +1107,11 @@ function parseAndGenerate() {
     <div class="notice">🎉 ¡Quiz generado exitosamente!</div>
     <div class="link-box" style="background:rgba(108,99,255,.05);border-color:rgba(108,99,255,.3)">
       <div style="width:100%">
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Tu enlace público ha sido creado. Haz clic en "Generar Enlace Corto" para compartirlo más fácil.</div>
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:.5rem">Tu quiz está listo. Haz clic en "Copiar Enlace" para enviarlo a tus amigos.</div>
       </div>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;width:100%">
-        <button class="btn btn-primary" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6)" onclick="shortenUrl(document.getElementById('rdHiddenLongUrl').textContent, this)">🔗 Generar Enlace Corto</button>
-        <button class="btn btn-ghost" onclick="navigator.clipboard.writeText(document.getElementById('rdHiddenLongUrl').textContent).then(()=>showToast('¡Enlace copiado!','📋'))">📋 Copiar URL Larga</button>
-        <button class="btn btn-success" onclick="renderPlayer(decodeQuiz(getHash()))">👁 Probar Quiz</button>
+        <button class="btn btn-primary" style="background:linear-gradient(135deg,#a78bfa,#8b5cf6)" onclick="shortenUrl(document.getElementById('rdHiddenLongUrl').textContent, this)">🔗 Copiar Enlace</button>
+        <button class="btn btn-ghost" onclick="renderPlayer(decodeQuiz(getHash()))">👁 Probar Quiz</button>
       </div>
       <span class="hidden" id="rdHiddenLongUrl">${url}</span>
     </div>`;
